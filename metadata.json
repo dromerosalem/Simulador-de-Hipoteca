@@ -1,0 +1,5 @@
+{
+  "name": "Simulador de Hipoteca",
+  "description": "Una aplicación web accesible para personas mayores que calcula y simula una hipoteca con pagos extra al capital. Permite visualizar el ahorro en tiempo e intereses a través de tablas y gráficos interactivos.",
+  "requestFramePermissions": []
+}
