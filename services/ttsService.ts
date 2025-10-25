@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Modality } from '@google/genai';
 
 // These functions are self-contained here to avoid external dependencies.
@@ -19,7 +18,6 @@ async function decodeAudioData(
     numChannels: number
 ): Promise<AudioBuffer> {
     const dataInt16 = new Int16Array(data.buffer);
-    // FIX: Corrected typo from dataInt116 to dataInt16.
     const frameCount = dataInt16.length / numChannels;
     const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
 
@@ -34,8 +32,10 @@ async function decodeAudioData(
 
 
 export async function speakText(text: string): Promise<void> {
+    // FIX: Per Gemini API guidelines, API key must be retrieved from process.env.API_KEY. This resolves the TypeScript error with `import.meta.env`.
     if (!process.env.API_KEY) {
-        throw new Error("API key is not configured.");
+        // This error will be shown in the browser console if the environment variable is not set correctly.
+        throw new Error("API key is not configured. Please set the API_KEY environment variable.");
     }
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
