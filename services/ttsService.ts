@@ -32,12 +32,16 @@ async function decodeAudioData(
 
 
 export async function speakText(text: string): Promise<void> {
-    // FIX: Per Gemini API guidelines, API key must be retrieved from process.env.API_KEY. This resolves the TypeScript error with `import.meta.env`.
-    if (!process.env.API_KEY) {
-        // This error will be shown in the browser console if the environment variable is not set correctly.
-        throw new Error("API key is not configured. Please set the API_KEY environment variable.");
+    // DEFINITIVE FIX: This is the correct way to access environment variables in a Vite project.
+    // WARNING: Do not share code with API keys.
+    const apiKey = import.meta.env.VITE_API_KEY;
+
+    if (!apiKey) {
+        // This error will appear in the browser's console if the VITE_API_KEY is not set in the deployment settings.
+        throw new Error("API key is not configured. Please ensure the VITE_API_KEY environment variable is set.");
     }
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+    const ai = new GoogleGenAI({ apiKey });
 
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
