@@ -10,7 +10,7 @@ import BalanceChart from './components/BalanceChart';
 import InterestPrincipalChart from './components/InterestPrincipalChart';
 import AmortizationTable from './components/AmortizationTable';
 import { DEFAULT_VALUES } from './constants';
-import { speakText } from './services/ttsService';
+import { speakText, unlockAudio } from './services/ttsService';
 
 const App: React.FC = () => {
     const [params, setParams] = useState<MortgageParams>(DEFAULT_VALUES);
@@ -42,6 +42,9 @@ const App: React.FC = () => {
 
     const handleSpeakResults = useCallback(async (results: CalculationResult | null) => {
         if (!results || isSpeaking) return;
+
+        // Unlock the audio context on user interaction, crucial for mobile browsers.
+        unlockAudio();
 
         setIsSpeaking(true);
         const { scenario, savings } = results;

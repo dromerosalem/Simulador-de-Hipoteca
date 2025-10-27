@@ -1,5 +1,33 @@
 import { GoogleGenAI, Modality } from '@google/genai';
 
+// --- Audio Context Management ---
+// A single AudioContext is created and reused to handle mobile browser autoplay policies.
+let audioContext: AudioContext | null = null;
+
+function getAudioContext(): AudioContext {
+    if (!audioContext) {
+        // Using `any` for `webkitAudioContext` to support older browsers.
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) {
+            throw new Error("Web Audio API is not supported in this browser.");
+        }
+        audioContext = new AudioContext({ sampleRate: 24000 });
+    }
+    return audioContext;
+}
+
+/**
+ * Unlocks the audio context. This must be called from within a user gesture
+ * (e.g., a click event) to comply with browser autoplay policies, especially on mobile.
+ */
+export function unlockAudio(): void {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+        ctx.resume();
+    }
+}
+
+
 // These functions are self-contained here to avoid external dependencies.
 function decodeBase64(base64: string): Uint8Array {
     const binaryString = atob(base64);
@@ -61,13 +89,13 @@ export async function speakText(text: string): Promise<void> {
         throw new Error("No audio data received from API.");
     }
     
-    // Using `any` for `webkitAudioContext` to support older browsers.
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) {
-        throw new Error("Web Audio API is not supported in this browser.");
-    }
+    const outputAudioContext = getAudioContext();
     
-    const outputAudioContext = new AudioContext({ sampleRate: 24000 });
+    // Ensure context is running, as it might have been suspended again.
+    if (outputAudioContext.state === 'suspended') {
+        await outputAudioContext.resume();
+    }
+
     const decodedBytes = decodeBase64(base64Audio);
     const audioBuffer = await decodeAudioData(
         decodedBytes,
@@ -83,7 +111,7 @@ export async function speakText(text: string): Promise<void> {
 
     return new Promise((resolve) => {
         source.onended = () => {
-            outputAudioContext.close();
+            // Do not close the shared audio context.
             resolve();
         };
     });
