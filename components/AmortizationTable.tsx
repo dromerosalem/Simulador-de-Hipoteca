@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { AmortizationDataPoint } from '../types';
+import { formatCurrency } from '../utils/formatters';
 
 interface AmortizationTableProps {
     data: AmortizationDataPoint[];
@@ -16,11 +16,6 @@ const AmortizationTable: React.FC<AmortizationTableProps> = ({ data }) => {
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
-
-    const formatCurrency = (value: number) => new Intl.NumberFormat('es-ES', {
-        style: 'currency',
-        currency: 'EUR',
-    }).format(value);
 
     return (
         <div>

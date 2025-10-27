@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Tooltip from './Tooltip';
 
 interface NumericInputProps {
@@ -12,27 +11,57 @@ interface NumericInputProps {
 }
 
 const NumericInput: React.FC<NumericInputProps> = ({ label, value, onChange, step = 1, fractionDigits = 2, tooltip }) => {
+    const formatNumber = (num: number) => new Intl.NumberFormat('es-ES', {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits,
+    }).format(num);
+
+    const [displayValue, setDisplayValue] = useState(formatNumber(value));
+
+    // Update display when the underlying value changes from the parent
+    useEffect(() => {
+        setDisplayValue(formatNumber(value));
+    }, [value, fractionDigits]);
+
     const handleStep = (direction: 'up' | 'down') => {
         const newValue = direction === 'up' ? value + step : value - step;
         onChange(parseFloat(newValue.toFixed(fractionDigits)));
     };
-
+    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        if (val === '') {
-            onChange(0);
-        } else {
-            const parsedValue = parseFloat(val);
-            if (!isNaN(parsedValue)) {
-                onChange(parsedValue);
-            }
-        }
+        setDisplayValue(e.target.value);
     };
 
-    const formattedValue = new Intl.NumberFormat('es-ES', {
-      minimumFractionDigits: fractionDigits,
-      maximumFractionDigits: fractionDigits,
-    }).format(value);
+    const handleBlur = () => {
+        // Flexible parsing: handles "1.234,56", "1,234.56", "1234.56", and "1234,56"
+        let sanitized = displayValue.replace(/[^0-9.,-]+/g, '');
+        
+        const lastComma = sanitized.lastIndexOf(',');
+        const lastDot = sanitized.lastIndexOf('.');
+
+        // If both exist, assume the last one is the decimal separator
+        if (lastComma > -1 && lastDot > -1) {
+            if (lastComma > lastDot) {
+                // Comma is decimal, dots are thousands separators
+                sanitized = sanitized.replace(/\./g, '').replace(',', '.');
+            } else {
+                // Dot is decimal, commas are thousands separators
+                sanitized = sanitized.replace(/,/g, '');
+            }
+        } else {
+            // If only one type of separator, assume it's a decimal comma and replace with dot
+            sanitized = sanitized.replace(',', '.');
+        }
+
+        const parsedValue = parseFloat(sanitized);
+
+        if (!isNaN(parsedValue)) {
+            onChange(parsedValue);
+            setDisplayValue(formatNumber(parsedValue));
+        } else {
+            setDisplayValue(formatNumber(value));
+        }
+    };
 
     return (
         <div>
@@ -50,16 +79,9 @@ const NumericInput: React.FC<NumericInputProps> = ({ label, value, onChange, ste
                 </button>
                 <input
                     type="text"
-                    value={formattedValue}
+                    value={displayValue}
                     onChange={handleChange}
-                    onBlur={(e) => { // Re-format on blur
-                      const parsedValue = parseFloat(e.target.value.replace(/\./g, '').replace(',', '.'));
-                      if (!isNaN(parsedValue)) {
-                          onChange(parsedValue);
-                      } else {
-                          onChange(value); // revert if invalid
-                      }
-                    }}
+                    onBlur={handleBlur}
                     className="w-full text-center text-2xl font-mono p-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-primary transition"
                 />
                 <button

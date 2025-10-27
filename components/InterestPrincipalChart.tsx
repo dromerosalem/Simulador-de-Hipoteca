@@ -1,7 +1,7 @@
-
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from 'recharts';
 import { YearlyAmortizationData } from '../types';
+import { formatCurrency } from '../utils/formatters';
 
 interface InterestPrincipalChartProps {
     data: YearlyAmortizationData[];
@@ -14,7 +14,7 @@ const InterestPrincipalChart: React.FC<InterestPrincipalChartProps> = ({ data })
         totalPrincipal: d.principalPaid + d.extraPayments,
     }));
 
-    const formatCurrency = (value: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(value);
+    const formatTick = (value: number) => formatCurrency(value, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
     return (
         <div className="w-full h-80">
@@ -22,9 +22,9 @@ const InterestPrincipalChart: React.FC<InterestPrincipalChartProps> = ({ data })
                 <BarChart data={chartData} margin={{ top: 5, right: 20, left: 40, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(128, 128, 128, 0.3)" />
                     <XAxis dataKey="yearLabel" tick={{ fill: 'currentColor' }} />
-                    <YAxis tickFormatter={formatCurrency} tick={{ fill: 'currentColor' }} />
+                    <YAxis tickFormatter={formatTick} tick={{ fill: 'currentColor' }} />
                      <RechartsTooltip
-                        formatter={(value: number) => formatCurrency(value)}
+                        formatter={(value: number) => formatTick(value)}
                         contentStyle={{
                             backgroundColor: 'rgba(45, 55, 72, 0.8)',
                             borderColor: '#005a9c',

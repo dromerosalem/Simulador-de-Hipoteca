@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback } from 'react';
 import { useMortgageCalculator } from './hooks/useMortgageCalculator';
 import { MortgageParams, ExtraPaymentFrequency, CalculationResult } from './types';
@@ -91,22 +90,22 @@ const App: React.FC = () => {
                                 value={params.principal}
                                 onChange={(val) => handleParamChange('principal', val)}
                                 step={1000}
-                                tooltip="La cantidad de dinero que todavía debes de tu hipoteca."
+                                tooltip="La cantidad que aún debes. Se aceptan decimales con coma (,) o punto (.), por ejemplo: 108570,49."
                             />
                             <NumericInput
                                 label="Tipo de Interés (TIN %)"
                                 value={params.annualRate}
                                 onChange={(val) => handleParamChange('annualRate', val)}
                                 step={0.1}
-                                fractionDigits={3}
-                                tooltip="El porcentaje de interés anual que pagas por el préstamo, sin incluir otros gastos."
+                                fractionDigits={4}
+                                tooltip="El interés anual sin otros gastos. Se aceptan decimales con coma (,) o punto (.), por ejemplo: 4,4160."
                             />
                             <NumericInput
                                 label="Cuota Mensual (€)"
                                 value={params.monthlyPayment}
                                 onChange={(val) => handleParamChange('monthlyPayment', val)}
                                 step={50}
-                                tooltip="La cantidad fija que pagas cada mes, sin contar los pagos extra."
+                                tooltip="La cantidad fija que pagas cada mes. Se aceptan decimales con coma (,) o punto (.), por ejemplo: 743,00."
                             />
                         </InputCard>
 
@@ -116,7 +115,7 @@ const App: React.FC = () => {
                                 value={params.extraPayment}
                                 onChange={(val) => handleParamChange('extraPayment', val)}
                                 step={500}
-                                tooltip="Dinero adicional que pagas para reducir tu deuda más rápido."
+                                tooltip="Dinero adicional para reducir tu deuda. Se aceptan decimales con coma (,) o punto (.), por ejemplo: 14000."
                             />
                             <SelectInput
                                 label="Frecuencia del Pago Extra"

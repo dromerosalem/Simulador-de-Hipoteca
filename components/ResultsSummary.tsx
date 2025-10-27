@@ -1,5 +1,6 @@
 import React from 'react';
 import { CalculationResult } from '../types';
+import { formatCurrency } from '../utils/formatters';
 
 interface ResultsSummaryProps {
     results: CalculationResult;
@@ -24,16 +25,16 @@ const ResultsSummary: React.FC<ResultsSummaryProps> = ({ results, onSpeak, isSpe
     const termReductionYears = Math.floor(savings.termReductionMonths / 12);
     const termReductionMonths = savings.termReductionMonths % 12;
     const termReductionText = `-${termReductionYears}a ${termReductionMonths}m`;
-
-    const formatCurrency = (amount: number) => `${Math.round(amount).toLocaleString('es-ES')} €`;
+    
+    const currencyOptions = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
 
     return (
         <div className="bg-primary/10 dark:bg-primary-dark/30 p-4 rounded-xl shadow-lg border border-primary/20">
             <div className="flex flex-col md:flex-row md:items-center md:justify-around gap-4">
                 <StatCard title="Plazo Restante" value={termText} color="text-primary-dark dark:text-primary-light" />
-                <StatCard title="Ahorro Intereses" value={formatCurrency(savings.interestSaved)} color="text-green-600 dark:text-green-400" />
+                <StatCard title="Ahorro Intereses" value={formatCurrency(savings.interestSaved, currencyOptions)} color="text-green-600 dark:text-green-400" />
                 <StatCard title="Ahorro Tiempo" value={termReductionText} color="text-green-600 dark:text-green-400" />
-                <StatCard title="Intereses Totales" value={formatCurrency(scenario.totalInterest)} color="text-red-600 dark:text-red-400" />
+                <StatCard title="Intereses Totales" value={formatCurrency(scenario.totalInterest, currencyOptions)} color="text-red-600 dark:text-red-400" />
                 <button 
                     onClick={onSpeak}
                     disabled={isSpeaking}
