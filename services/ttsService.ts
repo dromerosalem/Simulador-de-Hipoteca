@@ -17,13 +17,22 @@ function getAudioContext(): AudioContext {
 }
 
 /**
- * Unlocks the audio context. This must be called from within a user gesture
- * (e.g., a click event) to comply with browser autoplay policies, especially on mobile.
+ * Unlocks the audio context and "primes" it by playing a silent sound.
+ * This must be called from within a user gesture (e.g., a click event)
+ * to comply with browser autoplay policies, especially on mobile.
  */
 export function unlockAudio(): void {
     const ctx = getAudioContext();
     if (ctx.state === 'suspended') {
-        ctx.resume();
+        ctx.resume().then(() => {
+            // Play a silent sound to "prime" the audio context. This is a common
+            // workaround for iOS Safari's strict autoplay policies.
+            const buffer = ctx.createBuffer(1, 1, 22050); // 1 frame is enough
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start(0);
+        }).catch(err => console.error("AudioContext resume failed:", err));
     }
 }
 
@@ -60,12 +69,11 @@ async function decodeAudioData(
 
 
 export async function speakText(text: string): Promise<void> {
-    // DEFINITIVE FIX: This is the correct way to access environment variables in a Vite project.
-    // WARNING: Do not share code with API keys.
+    // As requested, using Vite's environment variable for the API key.
     const apiKey = import.meta.env.VITE_API_KEY;
 
     if (!apiKey) {
-        // This error will appear in the browser's console if the VITE_API_KEY is not set in the deployment settings.
+        // This error will appear in the browser's console if the API_KEY is not set.
         throw new Error("API key is not configured. Please ensure the VITE_API_KEY environment variable is set.");
     }
 
